@@ -52,8 +52,9 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.profileDriver.createUserProfile(params.get(KEY_USER_NAME), params.get(KEY_USER_FULLNAME), params.get(KEY_USER_PASSWORD));
 
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 	@RequestMapping(value = "/followFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
@@ -62,8 +63,9 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.profileDriver.followFriend(userName, friendUserName);		
 		
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 	@RequestMapping(value = "/getAllFriendFavouriteSongTitles/{userName}", method = RequestMethod.GET)
@@ -72,6 +74,8 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		
+		this.profileDriver.getAllSongFriendsLike(userName);
 
 		return null;
 	}
@@ -83,8 +87,9 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.profileDriver.unfollowFriend(userName, friendUserName);
 
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 	@RequestMapping(value = "/likeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -93,8 +98,9 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.playlistDriver.likeSong(userName, songId);
 
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 	@RequestMapping(value = "/unlikeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -103,8 +109,9 @@ public class ProfileController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.playlistDriver.unlikeSong(userName, songId);
 
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 	@RequestMapping(value = "/deleteAllSongsFromDb/{songId}", method = RequestMethod.PUT)
