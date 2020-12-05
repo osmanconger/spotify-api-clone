@@ -205,6 +205,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 		HashMap<String, ArrayList<String>> data = new HashMap<>();
 		
 		ArrayList<String> friends = getAllFriends(userName);
+		
 		if(friends != null) {
 			for (String friend: friends) {
 				data.put(friend, getSongTitles(getAllLikedSongs(friend)));
@@ -213,9 +214,9 @@ public class ProfileDriverImpl implements ProfileDriver {
 			status = new DbQueryStatus("found all likes", DbQueryExecResult.QUERY_OK);
 			status.setData(data);
 	
+		} else {
+			status = new DbQueryStatus("invalid username", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
 		}
-		
-		status = new DbQueryStatus("invalid username", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
 		
 		return status;
 	}

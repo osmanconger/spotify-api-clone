@@ -117,8 +117,8 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 				Map<String, Object> parameters = new HashMap<String, Object>();
 				parameters.put("songId", songId);
 				
-				queryStr = "MATCH (s:song{songId:{songId}})\r\n"
-						+ "DELETE s";
+				queryStr = "MATCH (s:song{songId:{songId}})\r\n" + "WITH s, count(*) AS s2 "
+						+ "DETACH DELETE s " + "RETURN s2";
 				StatementResult result = trans.run(queryStr, parameters);	
 				trans.success();
 				
