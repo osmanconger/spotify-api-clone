@@ -143,7 +143,10 @@ public class ProfileDriverImpl implements ProfileDriver {
 				
 				queryStr = "MATCH (:profile{userName:{userName}})-[f:follows]->(u:profile)\r\n"
 						+ "RETURN u.userName";
-				StatementResult result = trans.run(queryStr, parameters);	
+				StatementResult result = trans.run(queryStr, parameters);
+				if(!result.hasNext())
+					return null;
+
 				friendsRecords = result.list();
 		        for (int i = 0; i < friendsRecords.size(); i++) {
 		        	friends.add(friendsRecords.get(i).get("u.userName").toString().replace("\"", ""));
@@ -202,13 +205,18 @@ public class ProfileDriverImpl implements ProfileDriver {
 		HashMap<String, ArrayList<String>> data = new HashMap<>();
 		
 		ArrayList<String> friends = getAllFriends(userName);
-		for (String friend: friends) {
-			data.put(friend, getSongTitles(getAllLikedSongs(friend)));
+		if(friends != null) {
+			for (String friend: friends) {
+				data.put(friend, getSongTitles(getAllLikedSongs(friend)));
+			}
+			
+			status = new DbQueryStatus("found all likes", DbQueryExecResult.QUERY_OK);
+			status.setData(data);
+	
 		}
 		
-		status = new DbQueryStatus("found all likes", DbQueryExecResult.QUERY_OK);
-		status.setData(data);
-
+		status = new DbQueryStatus("invalid username", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+		
 		return status;
 	}
 }
