@@ -124,4 +124,16 @@ public class ProfileController {
 
 		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
+	
+	@RequestMapping(value = "/addSongToDB/{songId}", method = RequestMethod.PUT)
+	public @ResponseBody Map<String, Object> addSongToDB(@PathVariable("songId") String songId,
+			HttpServletRequest request) {
+
+		Map<String, Object> response = new HashMap<String, Object>();
+		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+		DbQueryStatus status = this.playlistDriver.addSongToDB(songId);
+
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+	}
+
 }

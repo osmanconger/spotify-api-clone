@@ -38,8 +38,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 				parameters.put("plName", userName+"-favorites");
 				parameters.put("songId", songId);
 				
-				queryStr = "MATCH (a:playlist{plName:{plName}})\r\n"
-						+ "MERGE (s:song{songId:{songId}})\r\n"
+				queryStr = "MATCH (a:playlist{plName:{plName}}), (s:song{songId:{songId}})\r\n"
 						+ "MERGE (a)-[i:includes]->(s)\r\n"
 						+ "RETURN i";
 				StatementResult result = trans.run(queryStr, parameters);	
@@ -114,4 +113,30 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 		}
 		return status;
 	}
+
+	public DbQueryStatus addSongToDB(String songId) {
+		String queryStr;
+		DbQueryStatus status;
+
+		try (Session session = ProfileMicroserviceApplication.driver.session()) {
+			try (Transaction trans = session.beginTransaction()) {
+				Map<String, Object> parameters = new HashMap<String, Object>();
+				parameters.put("songId", songId);
+				
+				queryStr = "MERGE (:song{songId:{songId}})";
+				StatementResult result = trans.run(queryStr, parameters);	
+				trans.success();
+				
+				if(result.hasNext())
+					status = new DbQueryStatus(result.consume().toString(), DbQueryExecResult.QUERY_OK);
+				else
+					status = new DbQueryStatus(result.consume().toString(), DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+			} catch(Exception e) {
+				status = new DbQueryStatus(e.getMessage(), DbQueryExecResult.QUERY_ERROR_GENERIC);
+			}
+			session.close();
+		}
+		return status;
+	}
+
 }
