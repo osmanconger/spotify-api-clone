@@ -88,7 +88,13 @@ public class SongController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
 		
-		DbQueryStatus status = songDal.deleteSongById(songId);;
+		DbQueryStatus status = songDal.deleteSongById(songId);
+		
+	//	if(status.getdbQueryExecResult() == DbQueryExecResult.QUERY_OK) {
+			restTemplate.exchange("http://localhost:3002/deleteAllSongsFromDb/" + songId, HttpMethod.PUT, null, String.class);
+	//	} 
+		
+
 		
 		response.put("message", status.getMessage());
 		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
@@ -109,7 +115,7 @@ public class SongController {
 		if(params.get(Song.KEY_SONG_NAME) != null && params.get(Song.KEY_SONG_ARTIST_FULL_NAME) != null && params.get(Song.KEY_SONG_ALBUM) != null) {
 			Song _song = new Song(params.get(Song.KEY_SONG_NAME), params.get(Song.KEY_SONG_ARTIST_FULL_NAME), params.get(Song.KEY_SONG_ALBUM));
 			status = songDal.addSong(_song);
-			restTemplate.exchange("http://localhost:3002/" + _song.getId(), HttpMethod.POST, null, String.class);
+			restTemplate.exchange("http://localhost:3002/addSongToDB/" + _song.getId(), HttpMethod.PUT, null, String.class);
 		}
 		else {
 			status = new DbQueryStatus("missing paramater", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
