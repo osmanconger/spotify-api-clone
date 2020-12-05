@@ -123,7 +123,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 				Map<String, Object> parameters = new HashMap<String, Object>();
 				parameters.put("songId", songId);
 				
-				queryStr = "MERGE (:song{songId:{songId}})";
+				queryStr = "MERGE (s:song{songId:{songId}}) RETURN s";
 				StatementResult result = trans.run(queryStr, parameters);	
 				trans.success();
 				

@@ -1,5 +1,10 @@
 package com.csc301.profilemicroservice;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +16,7 @@ import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.exceptions.ClientException;
 
@@ -140,7 +146,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 				StatementResult result = trans.run(queryStr, parameters);	
 				friendsRecords = result.list();
 		        for (int i = 0; i < friendsRecords.size(); i++) {
-		        	friends.add(friendsRecords.get(i).get("u.userName").toString());
+		        	friends.add(friendsRecords.get(i).get("u.userName").toString().replace("\"", ""));
 		        }
 								
 				trans.success();
@@ -163,23 +169,46 @@ public class ProfileDriverImpl implements ProfileDriver {
 				
 				queryStr = "MATCH (:playlist{plName:{plName}})-[i:includes]->(s:song)\r\n"
 						+ "RETURN s.songId";
-				StatementResult result = trans.run(queryStr, parameters);	
+				StatementResult result = trans.run(queryStr, parameters);
 				songsRecords = result.list();
 		        for (int i = 0; i < songsRecords.size(); i++) {
-		        	songs.add(songsRecords.get(i).get("s.songId").toString());
+		        	songs.add(songsRecords.get(i).get("s.songId").toString().replace("\"", ""));
 		        }
 								
 				trans.success();
 			}
 			session.close();
 		}
-		
+				
 		return songs;
+	}
+	
+	public ArrayList<String> getSongTitles(ArrayList<String> songs) {
+		RestTemplate restTemplate = new RestTemplate();
+		ArrayList<String> songTitles = new ArrayList<>();
+		
+		for(String song: songs) {
+		    String uri = "http://localhost:3001/getSongTitleById/"+song;
+		    Map<String, String> result = restTemplate.getForObject(uri, Map.class);
+		    songTitles.add(result.get("data"));
+		}
+		
+		return songTitles;
 	}
 
 	@Override
 	public DbQueryStatus getAllSongFriendsLike(String userName) {
+		DbQueryStatus status;
+		HashMap<String, ArrayList<String>> data = new HashMap<>();
+		
 		ArrayList<String> friends = getAllFriends(userName);
-		return null;
+		for (String friend: friends) {
+			data.put(friend, getSongTitles(getAllLikedSongs(friend)));
+		}
+		
+		status = new DbQueryStatus("found all likes", DbQueryExecResult.QUERY_OK);
+		status.setData(data);
+
+		return status;
 	}
 }

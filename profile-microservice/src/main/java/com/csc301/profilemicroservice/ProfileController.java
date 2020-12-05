@@ -75,9 +75,9 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 		
-		this.profileDriver.getAllSongFriendsLike(userName);
+		DbQueryStatus status = this.profileDriver.getAllSongFriendsLike(userName);
 
-		return null;
+		return Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 	}
 
 
