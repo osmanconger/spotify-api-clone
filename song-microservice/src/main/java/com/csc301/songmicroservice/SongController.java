@@ -43,11 +43,12 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("GET %s", Utils.getUrl(request)));
+		System.out.println("its working 1");
 
-		DbQueryStatus dbQueryStatus = songDal.findSongById(songId);
-
-		response.put("message", dbQueryStatus.getMessage());
-		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+		DbQueryStatus status = songDal.findSongById(songId);;
+		
+		response.put("message", status.getMessage());
+		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 
 		return response;
 	}
@@ -60,7 +61,12 @@ public class SongController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("GET %s", Utils.getUrl(request)));
 
-		return null;
+		DbQueryStatus status = songDal.getSongTitleById(songId);;
+		
+		response.put("message", status.getMessage());
+		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+
+		return response;
 	}
 
 	
@@ -70,19 +76,37 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
-
-		return null;
+		
+		DbQueryStatus status = songDal.deleteSongById(songId);;
+		
+		response.put("message", status.getMessage());
+		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		
+		return response;
 	}
 
 	
 	@RequestMapping(value = "/addSong", method = RequestMethod.POST)
 	public @ResponseBody Map<String, Object> addSong(@RequestParam Map<String, String> params,
 			HttpServletRequest request) {
-
-		Map<String, Object> response = new HashMap<String, Object>();
+		
+ 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("path", String.format("POST %s", Utils.getUrl(request)));
-
-		return null;
+		
+		DbQueryStatus status;
+		
+		if(params.get(Song.KEY_SONG_NAME) != null && params.get(Song.KEY_SONG_ARTIST_FULL_NAME) != null && params.get(Song.KEY_SONG_ALBUM) != null) {
+			Song _song = new Song(params.get(Song.KEY_SONG_NAME), params.get(Song.KEY_SONG_ARTIST_FULL_NAME), params.get(Song.KEY_SONG_ALBUM));
+			status = songDal.addSong(_song);
+		}
+		else {
+			status = new DbQueryStatus("missing paramater", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+		}
+		
+		response.put("message", status.getMessage());
+		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		
+		return response;
 	}
 
 	
@@ -93,6 +117,18 @@ public class SongController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("data", String.format("PUT %s", Utils.getUrl(request)));
 
-		return null;
+		DbQueryStatus status;
+		
+		if(shouldDecrement.equals("true") || shouldDecrement.equals("false")) {
+			status = songDal.updateSongFavouritesCount(songId, Boolean.parseBoolean(shouldDecrement));
+		}
+		else {
+			status = new DbQueryStatus("missing paramater or contains a parameter with unperimitted value", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+		}
+		
+		response.put("message", status.getMessage());
+		response = Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+		
+		return response;
 	}
 }
