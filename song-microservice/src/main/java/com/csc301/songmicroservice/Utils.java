@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class Utils {
 
+	@SuppressWarnings("deprecation")
 	public static RequestBody emptyRequestBody = RequestBody.create(null, "");
 	
 	// Used to determine path that was called from within each REST route, you don't need to modify this
