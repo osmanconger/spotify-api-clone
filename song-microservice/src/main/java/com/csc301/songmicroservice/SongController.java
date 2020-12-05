@@ -1,6 +1,8 @@
 package com.csc301.songmicroservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,6 +28,14 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/")
 public class SongController {
+	
+	@Bean
+	public RestTemplate getRestTemplate() {
+		return new RestTemplate();
+	}
+	
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Autowired
 	private final SongDal songDal;
@@ -98,6 +109,7 @@ public class SongController {
 		if(params.get(Song.KEY_SONG_NAME) != null && params.get(Song.KEY_SONG_ARTIST_FULL_NAME) != null && params.get(Song.KEY_SONG_ALBUM) != null) {
 			Song _song = new Song(params.get(Song.KEY_SONG_NAME), params.get(Song.KEY_SONG_ARTIST_FULL_NAME), params.get(Song.KEY_SONG_ALBUM));
 			status = songDal.addSong(_song);
+			restTemplate.exchange("http://localhost:3002/" + _song.getId(), HttpMethod.POST, null, String.class);
 		}
 		else {
 			status = new DbQueryStatus("missing paramater", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
